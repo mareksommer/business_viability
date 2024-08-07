@@ -12,14 +12,121 @@ datasource db {
 }
 
 model User {
-  id                String   @id @default(uuid())
-  email             String   @unique
+  id                String    @id @default(uuid())
+  email             String    @unique
   firstName         String?
   lastName          String?
   password          String?
   lostPasswordToken String?
-  lang              String   @default("en")
-  isActive          Boolean  @default(true)
-  registeredAt      DateTime @default(now())
-  updatedAt         DateTime @default(now())
+  lang              String    @default("en")
+  isActive          Boolean   @default(true)
+  registeredAt      DateTime  @default(now())
+  updatedAt         DateTime  @default(now())
+  projects          Project[]
+}
+
+model Project {
+  id                   String                @id @default(uuid())
+  title                String
+  value                Decimal?
+  isActive             Boolean               @default(true)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @default(now())
+  owner                User                  @relation(fields: [ownerId], references: [id])
+  ownerId              String
+  stageBusinessModel   StageBusinessModel?
+  stageRevenueProducts StageRevenueProducts?
+  stageExpenses        StageExpenses?
+  expenses             Expenses[]
+  revenueProducts      RevenueProduct[]
+}
+
+model StageBusinessModel {
+  id                  String        @id @default(uuid())
+  completed           Boolean
+  businessName        String
+  businessDescription String
+  targetAudience      String
+  project             Project       @relation(fields: [projectId], references: [id])
+  projectId           String        @unique
+  businessType        BusinessType  @relation(fields: [businessTypeId], references: [id])
+  businessTypeId      String
+  businessModel       BusinessModel @relation(fields: [businessModelId], references: [id])
+  businessModelId     String
+}
+
+model BusinessType {
+  id                 String               @id @default(uuid())
+  name               String
+  stageBusinessModel StageBusinessModel[]
+}
+
+model BusinessModel {
+  id                 String               @id @default(uuid())
+  name               String
+  stageBusinessModel StageBusinessModel[]
+}
+
+model StageRevenueProducts {
+  id        String  @id @default(uuid())
+  completed Boolean
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String  @unique
+}
+
+model RevenueProduct {
+  id                      String                @id @default(uuid())
+  name                    String
+  description             String?
+  productionCost          Decimal?
+  sellingPrice            Decimal?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @default(now())
+  project                 Project               @relation(fields: [projectId], references: [id])
+  projectId               String                @unique
+  type                    ProductType           @relation(fields: [typeId], references: [id])
+  typeId                  String
+  subscriptionFrequency   SubscriptionFrequency @relation(fields: [subscriptionFrequencyId], references: [id])
+  subscriptionFrequencyId String
+}
+
+model ProductType {
+  id              String           @id @default(uuid())
+  name            String
+  revenueProducts RevenueProduct[]
+}
+
+model SubscriptionFrequency {
+  id              String           @id @default(uuid())
+  name            String
+  revenueProducts RevenueProduct[]
+}
+
+model StageExpenses {
+  id        String   @id @default(uuid())
+  completed Boolean
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String   @unique
+}
+
+model Expenses {
+  id          String            @id @default(uuid())
+  name        String
+  amount      Decimal?
+  description String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @default(now())
+  frequency   ExpensesFrequency @relation(fields: [frequencyId], references: [id])
+  frequencyId String
+  project     Project           @relation(fields: [projectId], references: [id])
+  projectId   String            @unique
+}
+
+model ExpensesFrequency {
+  id       String     @id @default(uuid())
+  name     String
+  expenses Expenses[]
 }
